@@ -104,15 +104,15 @@ public class GithubGraphQLService {
           NoSuchAlgorithmException,
           InvalidKeySpecException,
           NoLinkedOrganizationException {
-<span class="nc" id="L107">    log.info(</span>
+<span class="fc" id="L107">    log.info(</span>
         &quot;getDefaultBasePermission called with course.getId(): {} orgLogin: {}&quot;,
-<span class="nc" id="L109">        course.getId(),</span>
+<span class="fc" id="L109">        course.getId(),</span>
         orgLogin);
 
-<span class="nc" id="L112">    String githubToken = jwtService.getInstallationToken(course);</span>
+<span class="fc" id="L112">    String githubToken = jwtService.getInstallationToken(course);</span>
 
     // language=GraphQL
-<span class="nc" id="L115">    String query =</span>
+<span class="fc" id="L115">    String query =</span>
         &quot;&quot;&quot;
         query GetOrgDefaultPermission($orgLogin: String!) {
           organization(login: $orgLogin) {
@@ -122,15 +122,15 @@ public class GithubGraphQLService {
         }
         &quot;&quot;&quot;;
 
-<span class="nc" id="L125">    return graphQlClient</span>
-<span class="nc" id="L126">        .mutate()</span>
-<span class="nc" id="L127">        .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
-<span class="nc" id="L128">        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)</span>
-<span class="nc" id="L129">        .build()</span>
-<span class="nc" id="L130">        .document(query)</span>
-<span class="nc" id="L131">        .variable(&quot;orgLogin&quot;, orgLogin)</span>
-<span class="nc" id="L132">        .retrieveSync(&quot;organization.defaultRepositoryPermission&quot;)</span>
-<span class="nc" id="L133">        .toEntity(String.class);</span>
+<span class="fc" id="L125">    return graphQlClient</span>
+<span class="fc" id="L126">        .mutate()</span>
+<span class="fc" id="L127">        .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
+<span class="fc" id="L128">        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)</span>
+<span class="fc" id="L129">        .build()</span>
+<span class="fc" id="L130">        .document(query)</span>
+<span class="fc" id="L131">        .variable(&quot;orgLogin&quot;, orgLogin)</span>
+<span class="fc" id="L132">        .retrieveSync(&quot;organization.defaultRepositoryPermission&quot;)</span>
+<span class="fc" id="L133">        .toEntity(String.class);</span>
   }
 
   public String getCommits(
