@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 @Builder
-<span class="nc" id="L12">@Slf4j</span>
+<span class="fc" id="L12">@Slf4j</span>
 public class DeleteRepoJob implements JobContextConsumer {
 
   private final Course course;
@@ -18,44 +18,44 @@ public class DeleteRepoJob implements JobContextConsumer {
 
   @Override
   public void accept(JobContext ctx) throws Exception {
-<span class="nc" id="L21">    ctx.log(</span>
-<span class="nc" id="L22">        String.format(</span>
-<span class="nc" id="L23">            &quot;Starting DeleteRepoJob for course %s with prefix %s&quot;, course.getCourseName(), prefix));</span>
+<span class="fc" id="L21">    ctx.log(</span>
+<span class="fc" id="L22">        String.format(</span>
+<span class="fc" id="L23">            &quot;Starting DeleteRepoJob for course %s with prefix %s&quot;, course.getCourseName(), prefix));</span>
 
     // Now returns a List of Strings
-<span class="nc" id="L26">    List&lt;String&gt; matchingRepos = repositoryService.getRepoNamesWithPrefix(course, prefix);</span>
+<span class="fc" id="L26">    List&lt;String&gt; matchingRepos = repositoryService.getRepoNamesWithPrefix(course, prefix);</span>
 
-<span class="nc" id="L28">    ctx.log(String.format(&quot;%d repos found with prefix %s&quot;, matchingRepos.size(), prefix));</span>
+<span class="fc" id="L28">    ctx.log(String.format(&quot;%d repos found with prefix %s&quot;, matchingRepos.size(), prefix));</span>
 
-<span class="nc" id="L30">    int reposDeleted = 0;</span>
-<span class="nc" id="L31">    int reposRetained = 0;</span>
-<span class="nc" id="L32">    int repoErrors = 0;</span>
+<span class="fc" id="L30">    int reposDeleted = 0;</span>
+<span class="fc" id="L31">    int reposRetained = 0;</span>
+<span class="fc" id="L32">    int repoErrors = 0;</span>
 
-<span class="nc bnc" id="L34" title="All 2 branches missed.">    for (String repoName : matchingRepos) {</span>
+<span class="fc bfc" id="L34" title="All 2 branches covered.">    for (String repoName : matchingRepos) {</span>
       try {
         // Sleep to prevent GitHub API rate limiting
-<span class="nc" id="L37">        Thread.sleep(1000);</span>
+<span class="fc" id="L37">        Thread.sleep(1000);</span>
 
         // Pass the course and repo name
-<span class="nc" id="L40">        boolean hasCommits = repositoryService.repoHasCommits(course, repoName);</span>
+<span class="fc" id="L40">        boolean hasCommits = repositoryService.repoHasCommits(course, repoName);</span>
 
-<span class="nc bnc" id="L42" title="All 2 branches missed.">        if (hasCommits) {</span>
-<span class="nc" id="L43">          reposRetained++;</span>
-<span class="nc" id="L44">          ctx.log(String.format(&quot;Repo %s not deleted; commits exist.&quot;, repoName));</span>
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (hasCommits) {</span>
+<span class="fc" id="L43">          reposRetained++;</span>
+<span class="fc" id="L44">          ctx.log(String.format(&quot;Repo %s not deleted; commits exist.&quot;, repoName));</span>
         } else {
-<span class="nc" id="L46">          repositoryService.deleteRepository(course, repoName);</span>
-<span class="nc" id="L47">          reposDeleted++;</span>
-<span class="nc" id="L48">          ctx.log(String.format(&quot;Deleted repo %s&quot;, repoName));</span>
+<span class="fc" id="L46">          repositoryService.deleteRepository(course, repoName);</span>
+<span class="fc" id="L47">          reposDeleted++;</span>
+<span class="fc" id="L48">          ctx.log(String.format(&quot;Deleted repo %s&quot;, repoName));</span>
         }
-<span class="nc" id="L50">      } catch (Exception e) {</span>
-<span class="nc" id="L51">        repoErrors++;</span>
-<span class="nc" id="L52">        ctx.log(String.format(&quot;Error processing repo %s: %s&quot;, repoName, e.getMessage()));</span>
-<span class="nc" id="L53">      }</span>
-<span class="nc" id="L54">    }</span>
+<span class="fc" id="L50">      } catch (Exception e) {</span>
+<span class="fc" id="L51">        repoErrors++;</span>
+<span class="fc" id="L52">        ctx.log(String.format(&quot;Error processing repo %s: %s&quot;, repoName, e.getMessage()));</span>
+<span class="fc" id="L53">      }</span>
+<span class="fc" id="L54">    }</span>
 
-<span class="nc" id="L56">    ctx.log(String.format(&quot;%d repos deleted&quot;, reposDeleted));</span>
-<span class="nc" id="L57">    ctx.log(String.format(&quot;%d repos retained&quot;, reposRetained));</span>
-<span class="nc" id="L58">    ctx.log(String.format(&quot;%d errors&quot;, repoErrors));</span>
-<span class="nc" id="L59">  }</span>
+<span class="fc" id="L56">    ctx.log(String.format(&quot;%d repos deleted&quot;, reposDeleted));</span>
+<span class="fc" id="L57">    ctx.log(String.format(&quot;%d repos retained&quot;, reposRetained));</span>
+<span class="fc" id="L58">    ctx.log(String.format(&quot;%d errors&quot;, repoErrors));</span>
+<span class="fc" id="L59">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

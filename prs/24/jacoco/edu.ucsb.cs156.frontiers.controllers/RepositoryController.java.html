@@ -124,23 +124,23 @@ import org.springframework.web.bind.annotation.RestController;
       @Parameter(name = &quot;courseId&quot;) @RequestParam Long courseId,
       @Parameter(name = &quot;prefix&quot;) @RequestParam String prefix) {
 
-<span class="nc" id="L127">    Course course =</span>
+<span class="fc" id="L127">    Course course =</span>
         courseRepository
-<span class="nc" id="L129">            .findById(courseId)</span>
-<span class="nc" id="L130">            .orElseThrow(() -&gt; new EntityNotFoundException(Course.class, courseId));</span>
+<span class="fc" id="L129">            .findById(courseId)</span>
+<span class="fc" id="L130">            .orElseThrow(() -&gt; new EntityNotFoundException(Course.class, courseId));</span>
 
-<span class="nc bnc" id="L132" title="All 4 branches missed.">    if (course.getOrgName() == null || course.getInstallationId() == null) {</span>
-<span class="nc" id="L133">      throw new NoLinkedOrganizationException(course.getCourseName());</span>
+<span class="pc bpc" id="L132" title="1 of 4 branches missed.">    if (course.getOrgName() == null || course.getInstallationId() == null) {</span>
+<span class="fc" id="L133">      throw new NoLinkedOrganizationException(course.getCourseName());</span>
     }
 
     DeleteRepoJob job =
-<span class="nc" id="L137">        DeleteRepoJob.builder()</span>
-<span class="nc" id="L138">            .course(course)</span>
-<span class="nc" id="L139">            .prefix(prefix)</span>
-<span class="nc" id="L140">            .repositoryService(repositoryService)</span>
-<span class="nc" id="L141">            .build();</span>
+<span class="fc" id="L137">        DeleteRepoJob.builder()</span>
+<span class="fc" id="L138">            .course(course)</span>
+<span class="fc" id="L139">            .prefix(prefix)</span>
+<span class="fc" id="L140">            .repositoryService(repositoryService)</span>
+<span class="fc" id="L141">            .build();</span>
 
-<span class="nc" id="L143">    return jobService.runAsJob(job);</span>
+<span class="fc" id="L143">    return jobService.runAsJob(job);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

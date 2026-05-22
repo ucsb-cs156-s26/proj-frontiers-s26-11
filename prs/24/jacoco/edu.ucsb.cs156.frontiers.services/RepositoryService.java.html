@@ -293,76 +293,76 @@ public class RepositoryService {
   /** Gets all repositories in the course's organization that start with the given prefix. */
   public List&lt;String&gt; getRepoNamesWithPrefix(Course course, String prefix)
       throws JsonProcessingException, NoSuchAlgorithmException, InvalidKeySpecException {
-<span class="nc" id="L296">    String token = jwtService.getInstallationToken(course);</span>
+<span class="fc" id="L296">    String token = jwtService.getInstallationToken(course);</span>
     // Grabs up to 100 repos (adjust if your org has more repos and you need pagination)
-<span class="nc" id="L298">    String endpoint = &quot;https://api.github.com/orgs/&quot; + course.getOrgName() + &quot;/repos?per_page=100&quot;;</span>
+<span class="fc" id="L298">    String endpoint = &quot;https://api.github.com/orgs/&quot; + course.getOrgName() + &quot;/repos?per_page=100&quot;;</span>
 
-<span class="nc" id="L300">    HttpHeaders headers = new HttpHeaders();</span>
-<span class="nc" id="L301">    headers.add(&quot;Authorization&quot;, &quot;Bearer &quot; + token);</span>
-<span class="nc" id="L302">    headers.add(&quot;Accept&quot;, &quot;application/vnd.github+json&quot;);</span>
-<span class="nc" id="L303">    headers.add(&quot;X-GitHub-Api-Version&quot;, &quot;2022-11-28&quot;);</span>
+<span class="fc" id="L300">    HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L301">    headers.add(&quot;Authorization&quot;, &quot;Bearer &quot; + token);</span>
+<span class="fc" id="L302">    headers.add(&quot;Accept&quot;, &quot;application/vnd.github+json&quot;);</span>
+<span class="fc" id="L303">    headers.add(&quot;X-GitHub-Api-Version&quot;, &quot;2022-11-28&quot;);</span>
 
-<span class="nc" id="L305">    HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;(headers);</span>
-<span class="nc" id="L306">    ResponseEntity&lt;String&gt; response =</span>
-<span class="nc" id="L307">        restTemplate.exchange(endpoint, HttpMethod.GET, entity, String.class);</span>
+<span class="fc" id="L305">    HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;(headers);</span>
+<span class="fc" id="L306">    ResponseEntity&lt;String&gt; response =</span>
+<span class="fc" id="L307">        restTemplate.exchange(endpoint, HttpMethod.GET, entity, String.class);</span>
 
-<span class="nc" id="L309">    JsonNode root = mapper.readTree(response.getBody());</span>
-<span class="nc" id="L310">    List&lt;String&gt; matchingRepos = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L309">    JsonNode root = mapper.readTree(response.getBody());</span>
+<span class="fc" id="L310">    List&lt;String&gt; matchingRepos = new ArrayList&lt;&gt;();</span>
 
-<span class="nc bnc" id="L312" title="All 2 branches missed.">    for (JsonNode repoNode : root) {</span>
-<span class="nc" id="L313">      String name = repoNode.get(&quot;name&quot;).asText();</span>
-<span class="nc bnc" id="L314" title="All 2 branches missed.">      if (name.startsWith(prefix)) {</span>
-<span class="nc" id="L315">        matchingRepos.add(name);</span>
+<span class="fc bfc" id="L312" title="All 2 branches covered.">    for (JsonNode repoNode : root) {</span>
+<span class="fc" id="L313">      String name = repoNode.get(&quot;name&quot;).asText();</span>
+<span class="fc bfc" id="L314" title="All 2 branches covered.">      if (name.startsWith(prefix)) {</span>
+<span class="fc" id="L315">        matchingRepos.add(name);</span>
       }
-<span class="nc" id="L317">    }</span>
-<span class="nc" id="L318">    return matchingRepos;</span>
+<span class="fc" id="L317">    }</span>
+<span class="fc" id="L318">    return matchingRepos;</span>
   }
 
   /** Checks if a repository has any commits. */
   public boolean repoHasCommits(Course course, String repoName)
       throws JsonProcessingException, NoSuchAlgorithmException, InvalidKeySpecException {
-<span class="nc" id="L324">    String token = jwtService.getInstallationToken(course);</span>
-<span class="nc" id="L325">    String endpoint =</span>
+<span class="fc" id="L324">    String token = jwtService.getInstallationToken(course);</span>
+<span class="fc" id="L325">    String endpoint =</span>
         &quot;https://api.github.com/repos/&quot;
-<span class="nc" id="L327">            + course.getOrgName()</span>
+<span class="fc" id="L327">            + course.getOrgName()</span>
             + &quot;/&quot;
             + repoName
             + &quot;/commits?per_page=1&quot;;
 
-<span class="nc" id="L332">    HttpHeaders headers = new HttpHeaders();</span>
-<span class="nc" id="L333">    headers.add(&quot;Authorization&quot;, &quot;Bearer &quot; + token);</span>
-<span class="nc" id="L334">    headers.add(&quot;Accept&quot;, &quot;application/vnd.github+json&quot;);</span>
-<span class="nc" id="L335">    headers.add(&quot;X-GitHub-Api-Version&quot;, &quot;2022-11-28&quot;);</span>
+<span class="fc" id="L332">    HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L333">    headers.add(&quot;Authorization&quot;, &quot;Bearer &quot; + token);</span>
+<span class="fc" id="L334">    headers.add(&quot;Accept&quot;, &quot;application/vnd.github+json&quot;);</span>
+<span class="fc" id="L335">    headers.add(&quot;X-GitHub-Api-Version&quot;, &quot;2022-11-28&quot;);</span>
 
-<span class="nc" id="L337">    HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;(headers);</span>
+<span class="fc" id="L337">    HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;(headers);</span>
 
     try {
-<span class="nc" id="L340">      ResponseEntity&lt;String&gt; response =</span>
-<span class="nc" id="L341">          restTemplate.exchange(endpoint, HttpMethod.GET, entity, String.class);</span>
+<span class="fc" id="L340">      ResponseEntity&lt;String&gt; response =</span>
+<span class="fc" id="L341">          restTemplate.exchange(endpoint, HttpMethod.GET, entity, String.class);</span>
       // If it returns 200 OK, there are commits
-<span class="nc" id="L343">      return response.getStatusCode().is2xxSuccessful();</span>
-<span class="nc" id="L344">    } catch (HttpClientErrorException e) {</span>
+<span class="fc" id="L343">      return response.getStatusCode().is2xxSuccessful();</span>
+<span class="fc" id="L344">    } catch (HttpClientErrorException e) {</span>
       // GitHub throws a 409 Conflict when you ask for commits on a completely empty repo
-<span class="nc bnc" id="L346" title="All 2 branches missed.">      if (e.getStatusCode() == HttpStatus.CONFLICT) {</span>
-<span class="nc" id="L347">        return false;</span>
+<span class="fc bfc" id="L346" title="All 2 branches covered.">      if (e.getStatusCode() == HttpStatus.CONFLICT) {</span>
+<span class="fc" id="L347">        return false;</span>
       }
-<span class="nc" id="L349">      throw e; // Re-throw if it's a different error (like 404 Not Found)</span>
+<span class="fc" id="L349">      throw e; // Re-throw if it's a different error (like 404 Not Found)</span>
     }
   }
 
   /** Deletes a repository using the GitHub REST API. */
   public void deleteRepository(Course course, String repoName)
       throws JsonProcessingException, NoSuchAlgorithmException, InvalidKeySpecException {
-<span class="nc" id="L356">    String token = jwtService.getInstallationToken(course);</span>
-<span class="nc" id="L357">    String endpoint = &quot;https://api.github.com/repos/&quot; + course.getOrgName() + &quot;/&quot; + repoName;</span>
+<span class="fc" id="L356">    String token = jwtService.getInstallationToken(course);</span>
+<span class="fc" id="L357">    String endpoint = &quot;https://api.github.com/repos/&quot; + course.getOrgName() + &quot;/&quot; + repoName;</span>
 
-<span class="nc" id="L359">    HttpHeaders headers = new HttpHeaders();</span>
-<span class="nc" id="L360">    headers.add(&quot;Authorization&quot;, &quot;Bearer &quot; + token);</span>
-<span class="nc" id="L361">    headers.add(&quot;Accept&quot;, &quot;application/vnd.github+json&quot;);</span>
-<span class="nc" id="L362">    headers.add(&quot;X-GitHub-Api-Version&quot;, &quot;2022-11-28&quot;);</span>
+<span class="fc" id="L359">    HttpHeaders headers = new HttpHeaders();</span>
+<span class="fc" id="L360">    headers.add(&quot;Authorization&quot;, &quot;Bearer &quot; + token);</span>
+<span class="fc" id="L361">    headers.add(&quot;Accept&quot;, &quot;application/vnd.github+json&quot;);</span>
+<span class="fc" id="L362">    headers.add(&quot;X-GitHub-Api-Version&quot;, &quot;2022-11-28&quot;);</span>
 
-<span class="nc" id="L364">    HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;(headers);</span>
-<span class="nc" id="L365">    restTemplate.exchange(endpoint, HttpMethod.DELETE, entity, String.class);</span>
-<span class="nc" id="L366">  }</span>
+<span class="fc" id="L364">    HttpEntity&lt;String&gt; entity = new HttpEntity&lt;&gt;(headers);</span>
+<span class="fc" id="L365">    restTemplate.exchange(endpoint, HttpMethod.DELETE, entity, String.class);</span>
+<span class="fc" id="L366">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
