@@ -107,7 +107,7 @@ public class OrganizationLinkerService {
 <span class="fc" id="L107">    ZonedDateTime now = ZonedDateTime.from(provider.getNow().get());</span>
 <span class="fc" id="L108">    String defaultBasePermission = githubGraphQLService.getDefaultBasePermission(course);</span>
 <span class="fc" id="L109">    boolean showDefaultBasePermissions =</span>
-<span class="pc bpc" id="L110" title="1 of 4 branches missed.">        !course.getHideBasePermissionWarning()</span>
+<span class="fc bfc" id="L110" title="All 4 branches covered.">        !course.getHideBasePermissionWarning()</span>
             &amp;&amp; defaultBasePermission != null
 <span class="fc bfc" id="L112" title="All 2 branches covered.">            &amp;&amp; !defaultBasePermission.equalsIgnoreCase(&quot;NONE&quot;);</span>
 <span class="fc" id="L113">    return new CourseWarning(creationDate.isAfter(now.minusMonths(1)), showDefaultBasePermissions);</span>
