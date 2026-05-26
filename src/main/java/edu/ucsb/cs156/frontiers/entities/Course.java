@@ -35,6 +35,13 @@ public class Course {
 
   private String canvasCourseId;
 
+  // --- NEW FIELD START ---
+  @Builder.Default
+  @Column(columnDefinition = "boolean default false")
+  private boolean hideBasePermissionWarning = false;
+
+  // --- NEW FIELD END ---
+
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "course")
   @Fetch(FetchMode.JOIN)
   @JsonIgnore

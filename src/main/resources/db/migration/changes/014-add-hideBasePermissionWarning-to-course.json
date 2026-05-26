@@ -1,0 +1,29 @@
+{
+  "databaseChangeLog": [
+    {
+      "changeSet": {
+        "id": "add-hideBasePermissionWarning-to-course",
+        "author": "Hudinid",
+        "changes": [
+          {
+            "addColumn": {
+              "tableName": "course",
+              "columns": [
+                {
+                  "column": {
+                    "name": "hide_base_permission_warning",
+                    "type": "boolean",
+                    "defaultValueBoolean": false,
+                    "constraints": {
+                      "nullable": false
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
