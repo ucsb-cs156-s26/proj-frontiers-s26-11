@@ -115,7 +115,7 @@ public class CoursesController extends ApiController {
           c.getInstructorEmail(),
           c.getRosterStudents() != null ? c.getRosterStudents().size() : 0,
           c.getCourseStaff() != null ? c.getCourseStaff().size() : 0,
-          c.isHideBasePermissionWarning()); // <-- 2. Grabbed from the database entity
+          c.getHideBasePermissionWarning()); // <-- 2. Grabbed from the database entity
     }
   }
 
