@@ -100,7 +100,8 @@ public class CoursesController extends ApiController {
       School school,
       String instructorEmail,
       int numStudents,
-      int numStaff) {
+      int numStaff,
+      boolean hideBasePermissionWarning) { // <-- 1. Added to the record definition
 
     // Creates view from Course entity
     public InstructorCourseView(Course c) {
@@ -113,7 +114,8 @@ public class CoursesController extends ApiController {
           c.getSchool(),
           c.getInstructorEmail(),
           c.getRosterStudents() != null ? c.getRosterStudents().size() : 0,
-          c.getCourseStaff() != null ? c.getCourseStaff().size() : 0);
+          c.getCourseStaff() != null ? c.getCourseStaff().size() : 0,
+          c.isHideBasePermissionWarning()); // <-- 2. Grabbed from the database entity
     }
   }
 
