@@ -45,6 +45,9 @@ describe("InstructorCourseShowPage tests", () => {
       canvasCourseId: "",
     });
     axiosMock.onGet("/api/jobs/course").reply(200, []);
+    axiosMock
+      .onGet(/\/api\/github\/graphql\/defaultbasepermission\?courseId=\d+/)
+      .reply(200, "None");
   });
 
   const setupInstructorUser = () => {
@@ -302,6 +305,7 @@ describe("InstructorCourseShowPage tests", () => {
       screen.getByTestId("InstructorCourseShowPage-EnrollmentTabComponent"),
     ).toBeInTheDocument();
   });
+
   test("header displays correct info when course is loaded without an installationId", async () => {
     setupInstructorUser();
 
@@ -334,6 +338,7 @@ describe("InstructorCourseShowPage tests", () => {
       screen.queryByTestId("InstructorCourseShowPage-tooltip-github-settings"),
     ).not.toBeInTheDocument();
   });
+
   test("header displays correct info when course is loaded (and displays warning)", async () => {
     setupInstructorUser();
 
@@ -371,7 +376,11 @@ describe("InstructorCourseShowPage tests", () => {
     ).toHaveAttribute("href", "https://github.com/ucsb-cs156-s25");
     expect(screen.getByText("Spring 2025")).toBeInTheDocument();
     expect(screen.getByText(/This GitHub Organization/i)).toBeInTheDocument();
+    expect(
+      screen.getByTestId("InstructorCourseShowPage-default-base-permission"),
+    ).toHaveTextContent("Default Base Permission: None");
   });
+
   test("expect the correct URL to the organization for the course", async () => {
     setupInstructorUser();
 
@@ -403,6 +412,7 @@ describe("InstructorCourseShowPage tests", () => {
       "https://github.com/organizations/ucsb-cs156-s25/settings/installations/123456",
     );
   });
+
   test("expect the correct tooltip ID and message for the github icon (that redirects to github installation settings)", async () => {
     setupInstructorUser();
 
@@ -442,6 +452,7 @@ describe("InstructorCourseShowPage tests", () => {
       "Manage settings for association between your GitHub organization and this web application.",
     );
   });
+
   test("does not show error modal on initial render", async () => {
     setupInstructorUser();
 

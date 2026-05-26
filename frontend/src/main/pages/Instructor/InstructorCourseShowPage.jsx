@@ -34,6 +34,16 @@ export default function InstructorCourseShowPage() {
     true,
   );
 
+  const { data: defaultBasePermission } = useBackend(
+    [`/api/github/graphql/defaultbasepermission?courseId=${courseId}`],
+    {
+      method: "GET",
+      url: `/api/github/graphql/defaultbasepermission?courseId=${courseId}`,
+    },
+    "",
+    true,
+  );
+
   const getCourseFailed = courseBackendFailureCount > 0;
 
   const navigate = useNavigate();
@@ -130,6 +140,12 @@ export default function InstructorCourseShowPage() {
                   )}
                 </div>
               )}
+              <div
+                data-testid={`${testId}-default-base-permission`}
+                className="text-muted"
+              >
+                Default Base Permission: {defaultBasePermission}
+              </div>
             </div>
           </div>
         </div>
