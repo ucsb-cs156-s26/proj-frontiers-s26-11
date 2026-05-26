@@ -27,6 +27,7 @@ import org.springframework.web.client.RestClient;
 public class GithubGraphQLService {
 
   private final HttpSyncGraphQlClient graphQlClient;
+  private final RestClient githubRestClient;
 
   private final JwtService jwtService;
 
@@ -42,9 +43,18 @@ public class GithubGraphQLService {
       DownloadedCommitRepository downloadedCommitRepository) {
     this.jwtService = jwtService;
     this.graphQlClient =
-        HttpSyncGraphQlClient.builder(builder.baseUrl(githubBaseUrl).build())
+        HttpSyncGraphQlClient.builder(builder.clone().baseUrl(githubBaseUrl).build())
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .build();
+
+    this.githubRestClient =
+        builder
+            .clone()
+            .baseUrl("https://api.github.com")
+            .defaultHeader(HttpHeaders.ACCEPT, "application/vnd.github+json")
+            .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
+            .build();
+
     this.jacksonObjectMapper = jacksonObjectMapper;
     this.downloadedCommitRepository = downloadedCommitRepository;
   }
@@ -95,6 +105,9 @@ public class GithubGraphQLService {
   /**
    * Retrieves the default base repository permission for a GitHub organization.
    *
+   * <p>This uses the GitHub REST API instead of GraphQL because GitHub GraphQL does not expose the
+   * organization default repository permission field.
+   *
    * @param course The course entity, used to fetch the associated GitHub installation token.
    * @param orgLogin The GitHub organization login.
    * @return The default repository permission for the organization.
@@ -111,26 +124,20 @@ public class GithubGraphQLService {
 
     String githubToken = jwtService.getInstallationToken(course);
 
-    // language=GraphQL
-    String query =
-        """
-        query GetOrgDefaultPermission($orgLogin: String!) {
-          organization(login: $orgLogin) {
-            name
-            defaultRepositoryPermission
-          }
-        }
-        """;
+    JsonNode response =
+        githubRestClient
+            .get()
+            .uri("/orgs/{orgLogin}", orgLogin)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + githubToken)
+            .retrieve()
+            .body(JsonNode.class);
 
-    return graphQlClient
-        .mutate()
-        .header("Authorization", "Bearer " + githubToken)
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .build()
-        .document(query)
-        .variable("orgLogin", orgLogin)
-        .retrieveSync("organization.defaultRepositoryPermission")
-        .toEntity(String.class);
+    if (response == null || !response.has("default_repository_permission")) {
+      throw new IllegalStateException(
+          "GitHub REST response did not include default_repository_permission");
+    }
+
+    return response.get("default_repository_permission").asText();
   }
 
   public String getCommits(
