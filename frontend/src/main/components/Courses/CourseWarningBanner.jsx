@@ -11,13 +11,27 @@ export function CourseWarningBanner({ courseId, orgName }) {
     undefined,
     true,
     {
-      placeholderData: {
-        showOrganizationAgeWarning: false,
-        showDefaultBasePermissions: false,
-      },
+      placeholderData: { showOrganizationAgeWarning: false },
       staleTime: "static",
     },
   );
+
+  const { data: defaultBasePermission } = useBackend(
+    [`/api/github/graphql/defaultbasepermission?courseId=${courseId}`],
+    {
+      method: "GET",
+      url: `/api/github/graphql/defaultbasepermission?courseId=${courseId}`,
+    },
+    undefined,
+    true,
+    {
+      placeholderData: "None",
+      staleTime: "static",
+    },
+  );
+
+  const showDefaultBasePermissionWarning =
+    defaultBasePermission && defaultBasePermission !== "None";
 
   return (
     <>
@@ -28,7 +42,7 @@ export function CourseWarningBanner({ courseId, orgName }) {
         </Alert>
       )}
 
-      {warnings?.showDefaultBasePermissions && (
+      {showDefaultBasePermissionWarning && (
         <Alert variant="warning">
           Warning: the organization setting for Default Base Permission is not
           the recommended value of None. This means that students in the
@@ -36,11 +50,10 @@ export function CourseWarningBanner({ courseId, orgName }) {
           <a
             href={`https://github.com/organizations/${orgName}/settings/member_privileges`}
             target="_blank"
-            rel="noopener noreferrer"
+            rel="noreferrer"
           >
-            You can change that setting here
+            You can change that setting here.
           </a>
-          .
         </Alert>
       )}
     </>
