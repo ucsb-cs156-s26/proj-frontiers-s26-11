@@ -28,6 +28,8 @@ public class GithubGraphQLService {
 
   private final HttpSyncGraphQlClient graphQlClient;
 
+  private final RestClient.Builder restClientBuilder;
+
   private final JwtService jwtService;
 
   private final String githubBaseUrl = "https://api.github.com/graphql";
@@ -41,6 +43,7 @@ public class GithubGraphQLService {
       ObjectMapper jacksonObjectMapper,
       DownloadedCommitRepository downloadedCommitRepository) {
     this.jwtService = jwtService;
+    this.restClientBuilder = builder;
     this.graphQlClient =
         HttpSyncGraphQlClient.builder(builder.baseUrl(githubBaseUrl).build())
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -112,7 +115,7 @@ public class GithubGraphQLService {
     String githubToken = jwtService.getInstallationToken(course);
 
     JsonNode response =
-        RestClient.builder()
+        restClientBuilder
             .baseUrl("https://api.github.com")
             .build()
             .get()
