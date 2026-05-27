@@ -3,8 +3,10 @@ import { Alert, Button } from "react-bootstrap";
 import { useBackend, useBackendMutation } from "main/utils/useBackend";
 
 export function CourseWarningBanner({ courseId }) {
-  const [hideDefaultBasePermissionWarning, setHideDefaultBasePermissionWarning] =
-    useState(false);
+  const [
+    hideDefaultBasePermissionWarning,
+    setHideDefaultBasePermissionWarning,
+  ] = useState(false);
 
   const { data: warnings } = useBackend(
     [`/api/courses/warnings/${courseId}`],

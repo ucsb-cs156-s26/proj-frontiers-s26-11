@@ -97,9 +97,7 @@ describe("CourseWarningBanner tests", () => {
 
     expect(screen.getByText(/read/i)).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("button", { name: /hide/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /hide/i })).toBeInTheDocument();
   });
 
   test("hide button calls hideBasePermissionWarning endpoint and hides warning", async () => {
