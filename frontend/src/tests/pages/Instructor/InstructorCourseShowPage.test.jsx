@@ -128,7 +128,7 @@ describe("InstructorCourseShowPage tests", () => {
         </MemoryRouter>
       </QueryClientProvider>,
     );
-    //Great time to also check initial values
+
     expect(queryClient.getQueryData(["/api/courses/7"])).toBe(null);
     const testId = "InstructorCourseShowPage";
 
@@ -224,7 +224,6 @@ describe("InstructorCourseShowPage tests", () => {
       .onGet("/api/rosterstudents/course/7")
       .reply(200, rosterStudentFixtures.threeStudents);
 
-    //here
     render(
       <QueryClientProvider client={queryClient}>
         <MemoryRouter initialEntries={["/instructor/courses/7"]}>
@@ -266,6 +265,13 @@ describe("InstructorCourseShowPage tests", () => {
       "data-rr-ui-event-key",
       "settings",
     );
+
+    // Kills the Stryker eventKey mutation for the Repos tab
+    expect(screen.getByText("Repos")).toHaveAttribute(
+      "data-rr-ui-event-key",
+      "repos",
+    );
+
     const changeTabs = screen.getByText("Students");
     fireEvent.click(changeTabs);
   });
@@ -487,7 +493,38 @@ describe("InstructorCourseShowPage tests", () => {
     );
 
     await screen.findByText("CMPSC 156");
+    expect(screen.queryByText("Course Not Found")).not.toBeInTheDocument();
+  });
 
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  test("clicking the Repos tab renders the DeleteEmptyRepoForm", async () => {
+    setupInstructorUser();
+
+    axiosMock
+      .onGet("/api/courses/7")
+      .reply(200, coursesFixtures.severalCourses[0]);
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={["/instructor/courses/7"]}>
+          <Routes>
+            <Route
+              path="/instructor/courses/:id"
+              element={<InstructorCourseShowPage />}
+            />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+
+    await screen.findByText("CMPSC 156");
+
+    const reposTab = await screen.findByText("Repos");
+    expect(reposTab).toBeInTheDocument();
+
+    fireEvent.click(reposTab);
+
+    expect(
+      await screen.findByText("Delete Empty Repositories"),
+    ).toBeInTheDocument();
   });
 });
