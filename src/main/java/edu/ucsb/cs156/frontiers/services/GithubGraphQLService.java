@@ -111,26 +111,36 @@ public class GithubGraphQLService {
 
     String githubToken = jwtService.getInstallationToken(course);
 
-    // language=GraphQL
-    String query =
-        """
-        query GetOrgDefaultPermission($orgLogin: String!) {
-          organization(login: $orgLogin) {
-            name
-            defaultRepositoryPermission
-          }
-        }
-        """;
+    JsonNode response =
+        RestClient.builder()
+            .baseUrl("https://api.github.com")
+            .build()
+            .get()
+            .uri("/orgs/{orgLogin}", orgLogin)
+            .header("Authorization", "Bearer " + githubToken)
+            .header("Accept", "application/vnd.github+json")
+            .retrieve()
+            .body(JsonNode.class);
 
-    return graphQlClient
-        .mutate()
-        .header("Authorization", "Bearer " + githubToken)
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .build()
-        .document(query)
-        .variable("orgLogin", orgLogin)
-        .retrieveSync("organization.defaultRepositoryPermission")
-        .toEntity(String.class);
+    String permission = response.path("default_repository_permission").asText();
+
+    if ("none".equals(permission)) {
+      return "None";
+    }
+
+    if ("read".equals(permission)) {
+      return "Read";
+    }
+
+    if ("write".equals(permission)) {
+      return "Write";
+    }
+
+    if ("admin".equals(permission)) {
+      return "Admin";
+    }
+
+    return permission;
   }
 
   public String getCommits(
