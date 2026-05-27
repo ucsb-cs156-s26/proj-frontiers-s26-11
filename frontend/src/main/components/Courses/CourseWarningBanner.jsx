@@ -8,8 +8,10 @@ export function CourseWarningBanner({ courseId }) {
     setHideDefaultBasePermissionWarning,
   ] = useState(false);
 
+  const warningsQueryKey = [`/api/courses/warnings/${courseId}`];
+
   const { data: warnings } = useBackend(
-    [`/api/courses/warnings/${courseId}`],
+    warningsQueryKey,
     {
       method: "GET",
       url: `/api/courses/warnings/${courseId}`,
@@ -17,11 +19,7 @@ export function CourseWarningBanner({ courseId }) {
     undefined,
     true,
     {
-      placeholderData: {
-        showOrganizationAgeWarning: false,
-        showDefaultBasePermissionWarning: false,
-        defaultBasePermission: null,
-      },
+      placeholderData: {},
       staleTime: "static",
     },
   );
@@ -34,7 +32,7 @@ export function CourseWarningBanner({ courseId }) {
   const hideDefaultBasePermissionWarningMutation = useBackendMutation(
     objectToAxiosParams,
     {},
-    [`/api/courses/warnings/${courseId}`],
+    warningsQueryKey,
   );
 
   const handleHideDefaultBasePermissionWarning = () => {
@@ -44,15 +42,15 @@ export function CourseWarningBanner({ courseId }) {
 
   return (
     <>
-      {warnings?.showOrganizationAgeWarning && (
+      {warnings?.showOrganizationAgeWarning === true && (
         <Alert variant="warning">
           Warning: This GitHub Organization is less than 30 days old. You will
           experience difficulties enrolling more than 50 students in a day.
         </Alert>
       )}
 
-      {warnings?.showDefaultBasePermissionWarning &&
-        !hideDefaultBasePermissionWarning && (
+      {warnings?.showDefaultBasePermissionWarning === true &&
+        hideDefaultBasePermissionWarning === false && (
           <Alert variant="warning">
             Warning: This GitHub Organization has default base permission set to{" "}
             {warnings.defaultBasePermission}. Members of the organization may be
