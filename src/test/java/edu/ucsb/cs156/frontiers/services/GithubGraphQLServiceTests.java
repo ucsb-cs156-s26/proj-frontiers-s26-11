@@ -12,6 +12,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withNoContent;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import edu.ucsb.cs156.frontiers.entities.Course;
@@ -109,6 +110,27 @@ public class GithubGraphQLServiceTests {
         .andExpect(method(HttpMethod.GET))
         .andExpect(header("Authorization", "Bearer mocked-token"))
         .andRespond(withSuccess(restResponse, MediaType.APPLICATION_JSON));
+
+    Exception exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> githubGraphQLService.getDefaultBasePermission(course, "test-org"));
+
+    mockServer.verify();
+    assertEquals(
+        "GitHub REST response did not include default_repository_permission",
+        exception.getMessage());
+  }
+
+  @Test
+  public void testGetDefaultBasePermission_nullResponse_throwsException() throws Exception {
+    when(jwtService.getInstallationToken(eq(course))).thenReturn("mocked-token");
+
+    mockServer
+        .expect(requestTo("https://api.github.com/orgs/test-org"))
+        .andExpect(method(HttpMethod.GET))
+        .andExpect(header("Authorization", "Bearer mocked-token"))
+        .andRespond(withNoContent());
 
     Exception exception =
         assertThrows(
