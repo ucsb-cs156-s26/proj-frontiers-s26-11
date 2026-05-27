@@ -2,6 +2,7 @@ package edu.ucsb.cs156.frontiers.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -92,6 +93,32 @@ public class GithubGraphQLServiceTests {
 
     mockServer.verify();
     assertEquals("read", result);
+  }
+
+  @Test
+  public void testGetDefaultBasePermission_missingDefaultRepositoryPermission_throwsException()
+      throws Exception {
+    when(jwtService.getInstallationToken(eq(course))).thenReturn("mocked-token");
+
+    String restResponse = """
+            {"login": "test-org"}
+            """;
+
+    mockServer
+        .expect(requestTo("https://api.github.com/orgs/test-org"))
+        .andExpect(method(HttpMethod.GET))
+        .andExpect(header("Authorization", "Bearer mocked-token"))
+        .andRespond(withSuccess(restResponse, MediaType.APPLICATION_JSON));
+
+    Exception exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> githubGraphQLService.getDefaultBasePermission(course, "test-org"));
+
+    mockServer.verify();
+    assertEquals(
+        "GitHub REST response did not include default_repository_permission",
+        exception.getMessage());
   }
 
   @Test
