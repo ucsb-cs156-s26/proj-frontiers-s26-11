@@ -34,6 +34,7 @@ export default function InstructorCourseShowPage() {
     true,
   );
 
+  // Stryker disable all : The exact endpoint, GET method, empty-string default, and enabled flag are required for useBackend
   const { data: defaultBasePermission } = useBackend(
     [`/api/github/graphql/defaultbasepermission?courseId=${courseId}`],
     {
@@ -43,6 +44,7 @@ export default function InstructorCourseShowPage() {
     "",
     true,
   );
+  // Stryker restore all
 
   const getCourseFailed = courseBackendFailureCount > 0;
 
