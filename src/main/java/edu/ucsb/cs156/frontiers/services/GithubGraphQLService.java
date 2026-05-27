@@ -28,6 +28,8 @@ public class GithubGraphQLService {
 
   private final HttpSyncGraphQlClient graphQlClient;
 
+  private final RestClient.Builder restClientBuilder;
+
   private final JwtService jwtService;
 
   private final String githubBaseUrl = "https://api.github.com/graphql";
@@ -41,6 +43,7 @@ public class GithubGraphQLService {
       ObjectMapper jacksonObjectMapper,
       DownloadedCommitRepository downloadedCommitRepository) {
     this.jwtService = jwtService;
+    this.restClientBuilder = builder;
     this.graphQlClient =
         HttpSyncGraphQlClient.builder(builder.baseUrl(githubBaseUrl).build())
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -90,6 +93,57 @@ public class GithubGraphQLService {
         .variable("repo", repo)
         .retrieveSync("repository.defaultBranchRef.name")
         .toEntity(String.class);
+  }
+
+  /**
+   * Retrieves the default base repository permission for a GitHub organization.
+   *
+   * @param course The course entity, used to fetch the associated GitHub installation token.
+   * @param orgLogin The GitHub organization login.
+   * @return The default repository permission for the organization.
+   */
+  public String getDefaultBasePermission(Course course, String orgLogin)
+      throws JsonProcessingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoLinkedOrganizationException {
+    log.info(
+        "getDefaultBasePermission called with course.getId(): {} orgLogin: {}",
+        course.getId(),
+        orgLogin);
+
+    String githubToken = jwtService.getInstallationToken(course);
+
+    JsonNode response =
+        restClientBuilder
+            .baseUrl("https://api.github.com")
+            .build()
+            .get()
+            .uri("/orgs/{orgLogin}", orgLogin)
+            .header("Authorization", "Bearer " + githubToken)
+            .header("Accept", "application/vnd.github+json")
+            .retrieve()
+            .body(JsonNode.class);
+
+    String permission = response.path("default_repository_permission").asText();
+
+    if ("none".equals(permission)) {
+      return "None";
+    }
+
+    if ("read".equals(permission)) {
+      return "Read";
+    }
+
+    if ("write".equals(permission)) {
+      return "Write";
+    }
+
+    if ("admin".equals(permission)) {
+      return "Admin";
+    }
+
+    return permission;
   }
 
   public String getCommits(
