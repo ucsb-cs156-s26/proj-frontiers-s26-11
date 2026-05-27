@@ -138,13 +138,13 @@ describe("CourseWarningBanner tests", () => {
 
     render(<CourseWarningBanner courseId={1} />);
 
-    expect(
-      screen.getByText(/default base permission set to/i),
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
 
-    expect(screen.getByText(/read/i)).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Warning: This GitHub Organization has default base permission set to read. Members of the organization may be able to see private repositories.",
+    );
 
-    expect(screen.getByRole("button", { name: /hide/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hide" })).toBeInTheDocument();
   });
 
   test("hide button calls hideBasePermissionWarning mutation and hides warning", async () => {
@@ -160,11 +160,13 @@ describe("CourseWarningBanner tests", () => {
 
     render(<CourseWarningBanner courseId={1} />);
 
-    expect(
-      screen.getByText(/default base permission set to/i),
-    ).toBeInTheDocument();
+    const alert = screen.getByRole("alert");
 
-    const hideButton = screen.getByRole("button", { name: /hide/i });
+    expect(alert).toHaveTextContent(
+      "Warning: This GitHub Organization has default base permission set to read. Members of the organization may be able to see private repositories.",
+    );
+
+    const hideButton = screen.getByRole("button", { name: "Hide" });
     await user.click(hideButton);
 
     expect(mutateMock).toHaveBeenCalledTimes(1);
