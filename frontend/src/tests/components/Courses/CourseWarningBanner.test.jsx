@@ -34,7 +34,10 @@ describe("CourseWarningBanner tests", () => {
       undefined,
       true,
       {
-        placeholderData: { showOrganizationAgeWarning: false },
+        placeholderData: {
+          showOrganizationAgeWarning: false,
+          showDefaultBasePermissions: false,
+        },
         staleTime: "static",
       },
     );
@@ -72,4 +75,31 @@ describe("CourseWarningBanner tests", () => {
       screen.queryByText(/This GitHub Organization/i),
     ).not.toBeInTheDocument();
   });
+  test("renders default base permissions warning when warning return is true", async () => {
+    vi.spyOn(useBackend, "useBackend");
+    axiosMock.onGet("/api/courses/warnings/1").reply(200, {
+      showOrganizationAgeWarning: false,
+      showDefaultBasePermissions: true,
+    });
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <CourseWarningBanner courseId={1} orgName="test-org" />
+      </QueryClientProvider>,
+    );
+
+    await screen.findByText(/Default Base Permission/i);
+    expect(
+      screen.getByText(/students in the organization may be able to access/i),
+    ).toBeInTheDocument();
+
+    const link = screen.getByRole("link", {
+      name: /You can change that setting here/i,
+    });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://github.com/organizations/test-org/settings/member_privileges",
+    );
+  });
+
 });
