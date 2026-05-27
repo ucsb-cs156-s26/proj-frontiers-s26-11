@@ -142,11 +142,11 @@ describe("CourseWarningBanner tests", () => {
       </QueryClientProvider>,
     );
 
-    await screen.findByText(/Default Base Permission is not/i);
+    const alert = await screen.findByRole("alert");
 
-    expect(
-      screen.getByText(/students in the organization may be able to access/i),
-    ).toBeInTheDocument();
+    expect(alert).toHaveTextContent(
+      "Warning: the organization setting for Default Base Permission is not the recommended value of None. This means that students in the organization may be able to access other students' private repos. You can change that setting here.",
+    );
 
     const link = screen.getByRole("link", {
       name: /You can change that setting here/i,
