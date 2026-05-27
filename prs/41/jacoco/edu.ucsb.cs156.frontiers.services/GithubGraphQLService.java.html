@@ -132,7 +132,7 @@ public class GithubGraphQLService {
 <span class="fc" id="L132">            .retrieve()</span>
 <span class="fc" id="L133">            .body(JsonNode.class);</span>
 
-<span class="pc bpc" id="L135" title="1 of 4 branches missed.">    if (response == null || !response.has(&quot;default_repository_permission&quot;)) {</span>
+<span class="fc bfc" id="L135" title="All 4 branches covered.">    if (response == null || !response.has(&quot;default_repository_permission&quot;)) {</span>
 <span class="fc" id="L136">      throw new IllegalStateException(</span>
           &quot;GitHub REST response did not include default_repository_permission&quot;);
     }
