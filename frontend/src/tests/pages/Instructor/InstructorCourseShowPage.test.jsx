@@ -46,7 +46,7 @@ describe("InstructorCourseShowPage tests", () => {
     });
     axiosMock.onGet("/api/jobs/course").reply(200, []);
     axiosMock
-      .onGet(/\/api\/github\/graphql\/defaultbasepermission\?courseId=\d+/)
+      .onGet("/api/github/graphql/defaultbasepermission?courseId=7")
       .reply(200, "None");
   });
 
@@ -379,6 +379,19 @@ describe("InstructorCourseShowPage tests", () => {
     expect(
       screen.getByTestId("InstructorCourseShowPage-default-base-permission"),
     ).toHaveTextContent("Default Base Permission: None");
+
+    expect(
+      screen.getByTestId("InstructorCourseShowPage-default-base-permission"),
+    ).not.toHaveTextContent("Stryker was here!");
+
+    expect(axiosMock.history.get).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          url: "/api/github/graphql/defaultbasepermission?courseId=7",
+          method: "get",
+        }),
+      ]),
+    );
   });
 
   test("expect the correct URL to the organization for the course", async () => {
