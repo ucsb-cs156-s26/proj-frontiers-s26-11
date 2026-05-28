@@ -92,13 +92,54 @@ public class GithubGraphQLService {
 <span class="fc" id="L92">        .toEntity(String.class);</span>
   }
 
+  /**
+   * Retrieves the default base repository permission for a GitHub organization.
+   *
+   * @param course The course entity, used to fetch the associated GitHub installation token.
+   * @param orgLogin The GitHub organization login.
+   * @return The default repository permission for the organization.
+   */
+  public String getDefaultBasePermission(Course course, String orgLogin)
+      throws JsonProcessingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoLinkedOrganizationException {
+<span class="fc" id="L107">    log.info(</span>
+        &quot;getDefaultBasePermission called with course.getId(): {} orgLogin: {}&quot;,
+<span class="fc" id="L109">        course.getId(),</span>
+        orgLogin);
+
+<span class="fc" id="L112">    String githubToken = jwtService.getInstallationToken(course);</span>
+
+    // language=GraphQL
+<span class="fc" id="L115">    String query =</span>
+        &quot;&quot;&quot;
+        query GetOrgDefaultPermission($orgLogin: String!) {
+          organization(login: $orgLogin) {
+            name
+            defaultRepositoryPermission
+          }
+        }
+        &quot;&quot;&quot;;
+
+<span class="fc" id="L125">    return graphQlClient</span>
+<span class="fc" id="L126">        .mutate()</span>
+<span class="fc" id="L127">        .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
+<span class="fc" id="L128">        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)</span>
+<span class="fc" id="L129">        .build()</span>
+<span class="fc" id="L130">        .document(query)</span>
+<span class="fc" id="L131">        .variable(&quot;orgLogin&quot;, orgLogin)</span>
+<span class="fc" id="L132">        .retrieveSync(&quot;organization.defaultRepositoryPermission&quot;)</span>
+<span class="fc" id="L133">        .toEntity(String.class);</span>
+  }
+
   public String getCommits(
       Course course, String owner, String repo, String branch, int first, String after)
       throws JsonProcessingException,
           NoSuchAlgorithmException,
           InvalidKeySpecException,
           NoLinkedOrganizationException {
-<span class="fc" id="L101">    return getCommits(course, owner, repo, branch, null, null, first, after);</span>
+<span class="fc" id="L142">    return getCommits(course, owner, repo, branch, null, null, first, after);</span>
   }
 
   /**
@@ -131,9 +172,9 @@ public class GithubGraphQLService {
           NoSuchAlgorithmException,
           InvalidKeySpecException,
           NoLinkedOrganizationException {
-<span class="fc" id="L134">    String githubToken = jwtService.getInstallationToken(course);</span>
+<span class="fc" id="L175">    String githubToken = jwtService.getInstallationToken(course);</span>
     // language=GraphQL
-<span class="fc" id="L136">    String query =</span>
+<span class="fc" id="L177">    String query =</span>
         &quot;&quot;&quot;
             query GetBranchCommits($owner: String!, $repo: String!, $branch: String!, $first: Int!, $after: String, $since: GitTimestamp, $until: GitTimestamp) {
               repository(owner: $owner, name: $repo) {
@@ -175,72 +216,72 @@ public class GithubGraphQLService {
             }
             &quot;&quot;&quot;;
 
-<span class="fc" id="L178">    GraphQlResponse response =</span>
+<span class="fc" id="L219">    GraphQlResponse response =</span>
         graphQlClient
-<span class="fc" id="L180">            .mutate()</span>
-<span class="fc" id="L181">            .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
-<span class="fc" id="L182">            .build()</span>
-<span class="fc" id="L183">            .document(query)</span>
-<span class="fc" id="L184">            .variable(&quot;owner&quot;, owner)</span>
-<span class="fc" id="L185">            .variable(&quot;repo&quot;, repo)</span>
-<span class="fc" id="L186">            .variable(&quot;branch&quot;, branch)</span>
-<span class="fc" id="L187">            .variable(&quot;first&quot;, size)</span>
-<span class="fc" id="L188">            .variable(&quot;after&quot;, cursor)</span>
-<span class="fc" id="L189">            .variable(&quot;since&quot;, since)</span>
-<span class="fc" id="L190">            .variable(&quot;until&quot;, until)</span>
-<span class="fc" id="L191">            .executeSync();</span>
+<span class="fc" id="L221">            .mutate()</span>
+<span class="fc" id="L222">            .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
+<span class="fc" id="L223">            .build()</span>
+<span class="fc" id="L224">            .document(query)</span>
+<span class="fc" id="L225">            .variable(&quot;owner&quot;, owner)</span>
+<span class="fc" id="L226">            .variable(&quot;repo&quot;, repo)</span>
+<span class="fc" id="L227">            .variable(&quot;branch&quot;, branch)</span>
+<span class="fc" id="L228">            .variable(&quot;first&quot;, size)</span>
+<span class="fc" id="L229">            .variable(&quot;after&quot;, cursor)</span>
+<span class="fc" id="L230">            .variable(&quot;since&quot;, since)</span>
+<span class="fc" id="L231">            .variable(&quot;until&quot;, until)</span>
+<span class="fc" id="L232">            .executeSync();</span>
 
-<span class="fc" id="L193">    Map&lt;String, Object&gt; data = response.getData();</span>
-<span class="fc" id="L194">    String jsonData = jacksonObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);</span>
-<span class="fc" id="L195">    return jsonData;</span>
+<span class="fc" id="L234">    Map&lt;String, Object&gt; data = response.getData();</span>
+<span class="fc" id="L235">    String jsonData = jacksonObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);</span>
+<span class="fc" id="L236">    return jsonData;</span>
   }
 
   public void downloadCommitHistory(DownloadRequest downloadRequest)
       throws NoSuchAlgorithmException, InvalidKeySpecException, JsonProcessingException {
-<span class="fc" id="L200">    String pointer = null;</span>
+<span class="fc" id="L241">    String pointer = null;</span>
     boolean hasNextPage;
-<span class="fc" id="L202">    List&lt;DownloadedCommit&gt; downloadedCommits = new ArrayList&lt;&gt;(4000);</span>
+<span class="fc" id="L243">    List&lt;DownloadedCommit&gt; downloadedCommits = new ArrayList&lt;&gt;(4000);</span>
     do {
-<span class="fc" id="L204">      JsonNode currentPage =</span>
-<span class="fc" id="L205">          jacksonObjectMapper.readTree(</span>
-<span class="fc" id="L206">              getCommits(</span>
-<span class="fc" id="L207">                  downloadRequest.getCourse(),</span>
-<span class="fc" id="L208">                  downloadRequest.getOrg(),</span>
-<span class="fc" id="L209">                  downloadRequest.getRepo(),</span>
-<span class="fc" id="L210">                  downloadRequest.getBranch(),</span>
-<span class="fc" id="L211">                  downloadRequest.getStartDate(),</span>
-<span class="fc" id="L212">                  downloadRequest.getEndDate(),</span>
+<span class="fc" id="L245">      JsonNode currentPage =</span>
+<span class="fc" id="L246">          jacksonObjectMapper.readTree(</span>
+<span class="fc" id="L247">              getCommits(</span>
+<span class="fc" id="L248">                  downloadRequest.getCourse(),</span>
+<span class="fc" id="L249">                  downloadRequest.getOrg(),</span>
+<span class="fc" id="L250">                  downloadRequest.getRepo(),</span>
+<span class="fc" id="L251">                  downloadRequest.getBranch(),</span>
+<span class="fc" id="L252">                  downloadRequest.getStartDate(),</span>
+<span class="fc" id="L253">                  downloadRequest.getEndDate(),</span>
                   100,
                   pointer));
-<span class="fc" id="L215">      pointer =</span>
+<span class="fc" id="L256">      pointer =</span>
           currentPage
-<span class="fc" id="L217">              .path(&quot;repository&quot;)</span>
-<span class="fc" id="L218">              .path(&quot;ref&quot;)</span>
-<span class="fc" id="L219">              .path(&quot;target&quot;)</span>
-<span class="fc" id="L220">              .path(&quot;history&quot;)</span>
-<span class="fc" id="L221">              .path(&quot;pageInfo&quot;)</span>
-<span class="fc" id="L222">              .path(&quot;endCursor&quot;)</span>
-<span class="fc" id="L223">              .asText();</span>
-<span class="fc" id="L224">      hasNextPage =</span>
+<span class="fc" id="L258">              .path(&quot;repository&quot;)</span>
+<span class="fc" id="L259">              .path(&quot;ref&quot;)</span>
+<span class="fc" id="L260">              .path(&quot;target&quot;)</span>
+<span class="fc" id="L261">              .path(&quot;history&quot;)</span>
+<span class="fc" id="L262">              .path(&quot;pageInfo&quot;)</span>
+<span class="fc" id="L263">              .path(&quot;endCursor&quot;)</span>
+<span class="fc" id="L264">              .asText();</span>
+<span class="fc" id="L265">      hasNextPage =</span>
           currentPage
-<span class="fc" id="L226">              .path(&quot;repository&quot;)</span>
-<span class="fc" id="L227">              .path(&quot;ref&quot;)</span>
-<span class="fc" id="L228">              .path(&quot;target&quot;)</span>
-<span class="fc" id="L229">              .path(&quot;history&quot;)</span>
-<span class="fc" id="L230">              .path(&quot;pageInfo&quot;)</span>
-<span class="fc" id="L231">              .path(&quot;hasNextPage&quot;)</span>
-<span class="fc" id="L232">              .asBoolean();</span>
-<span class="fc" id="L233">      JsonNode commits =</span>
-<span class="fc" id="L234">          currentPage.path(&quot;repository&quot;).path(&quot;ref&quot;).path(&quot;target&quot;).path(&quot;history&quot;).path(&quot;edges&quot;);</span>
-<span class="fc bfc" id="L235" title="All 2 branches covered.">      for (JsonNode node : commits) {</span>
-<span class="fc" id="L236">        DownloadedCommit newCommit =</span>
-<span class="fc" id="L237">            jacksonObjectMapper.treeToValue(node.get(&quot;node&quot;), DownloadedCommit.class);</span>
-<span class="fc" id="L238">        newCommit.setRequest(downloadRequest);</span>
-<span class="fc" id="L239">        downloadedCommits.add(newCommit);</span>
-<span class="fc" id="L240">      }</span>
+<span class="fc" id="L267">              .path(&quot;repository&quot;)</span>
+<span class="fc" id="L268">              .path(&quot;ref&quot;)</span>
+<span class="fc" id="L269">              .path(&quot;target&quot;)</span>
+<span class="fc" id="L270">              .path(&quot;history&quot;)</span>
+<span class="fc" id="L271">              .path(&quot;pageInfo&quot;)</span>
+<span class="fc" id="L272">              .path(&quot;hasNextPage&quot;)</span>
+<span class="fc" id="L273">              .asBoolean();</span>
+<span class="fc" id="L274">      JsonNode commits =</span>
+<span class="fc" id="L275">          currentPage.path(&quot;repository&quot;).path(&quot;ref&quot;).path(&quot;target&quot;).path(&quot;history&quot;).path(&quot;edges&quot;);</span>
+<span class="fc bfc" id="L276" title="All 2 branches covered.">      for (JsonNode node : commits) {</span>
+<span class="fc" id="L277">        DownloadedCommit newCommit =</span>
+<span class="fc" id="L278">            jacksonObjectMapper.treeToValue(node.get(&quot;node&quot;), DownloadedCommit.class);</span>
+<span class="fc" id="L279">        newCommit.setRequest(downloadRequest);</span>
+<span class="fc" id="L280">        downloadedCommits.add(newCommit);</span>
+<span class="fc" id="L281">      }</span>
 
-<span class="fc bfc" id="L242" title="All 2 branches covered.">    } while (hasNextPage);</span>
-<span class="fc" id="L243">    downloadedCommitRepository.saveAll(downloadedCommits);</span>
-<span class="fc" id="L244">  }</span>
+<span class="fc bfc" id="L283" title="All 2 branches covered.">    } while (hasNextPage);</span>
+<span class="fc" id="L284">    downloadedCommitRepository.saveAll(downloadedCommits);</span>
+<span class="fc" id="L285">  }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
