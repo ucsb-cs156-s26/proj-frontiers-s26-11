@@ -425,7 +425,9 @@ describe("HomePageLoggedIn tests", () => {
     expect(
       queryClient.getQueryState(["/api/courses/allForInstructors"]),
     ).toBeTruthy();
-    expect(screen.queryByTestId("CourseModal-base")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.queryByTestId("CourseModal-base")).not.toBeInTheDocument(),
+    );
   });
 
   test("toast called on instructor error", async () => {
