@@ -101,7 +101,7 @@ public class CoursesController extends ApiController {
       String instructorEmail,
       int numStudents,
       int numStaff,
-      boolean hideBasePermissionWarning) { 
+      boolean hideBasePermissionWarning) {
 
     // Creates view from Course entity
     public InstructorCourseView(Course c) {
@@ -115,7 +115,7 @@ public class CoursesController extends ApiController {
           c.getInstructorEmail(),
           c.getRosterStudents() != null ? c.getRosterStudents().size() : 0,
           c.getCourseStaff() != null ? c.getCourseStaff().size() : 0,
-          c.getHideBasePermissionWarning()); 
+          c.getHideBasePermissionWarning());
     }
   }
 

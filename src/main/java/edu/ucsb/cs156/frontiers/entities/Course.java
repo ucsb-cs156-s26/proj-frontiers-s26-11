@@ -35,7 +35,6 @@ public class Course {
 
   private String canvasCourseId;
 
-  
   @Builder.Default
   @Column(columnDefinition = "boolean default false")
   private boolean hideBasePermissionWarning = false;
