@@ -134,7 +134,7 @@ public class OrganizationLinkerService {
 
   private String readDefaultBasePermission(JsonNode organizationJson) {
 <span class="fc" id="L136">    JsonNode permissionNode = organizationJson.path(&quot;default_repository_permission&quot;);</span>
-<span class="pc bpc" id="L137" title="1 of 4 branches missed.">    if (permissionNode.isMissingNode() || permissionNode.isNull()) {</span>
+<span class="fc bfc" id="L137" title="All 4 branches covered.">    if (permissionNode.isMissingNode() || permissionNode.isNull()) {</span>
 <span class="fc" id="L138">      return null;</span>
     }
 <span class="fc" id="L140">    return permissionNode.asText().toUpperCase(Locale.ROOT);</span>
