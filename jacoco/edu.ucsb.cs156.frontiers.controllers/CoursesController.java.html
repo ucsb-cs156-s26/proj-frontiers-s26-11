@@ -37,7 +37,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = &quot;Course&quot;)
-@RequestMapping(&quot;/api/courses&quot;)
+@RequestMapping({&quot;/api/courses&quot;, &quot;/api/course&quot;})
 @RestController
 <span class="fc" id="L42">@Slf4j</span>
 <span class="fc" id="L43">public class CoursesController extends ApiController {</span>
@@ -513,6 +513,19 @@ import org.springframework.web.bind.annotation.*;
 <span class="fc" id="L513">            .findById(courseId)</span>
 <span class="fc" id="L514">            .orElseThrow(() -&gt; new EntityNotFoundException(Course.class, courseId));</span>
 <span class="fc" id="L515">    return linkerService.checkCourseWarnings(course);</span>
+  }
+
+  @Operation(summary = &quot;Hide base permission warning for a course&quot;)
+  @PostMapping(&quot;/warnings/hideBasePermissionWarning/{courseId}&quot;)
+  @PreAuthorize(&quot;@CourseSecurity.hasManagePermissions(#root, #courseId)&quot;)
+  public Course hideBasePermissionWarning(@PathVariable Long courseId) {
+<span class="fc" id="L522">    Course course =</span>
+        courseRepository
+<span class="fc" id="L524">            .findById(courseId)</span>
+<span class="fc" id="L525">            .orElseThrow(() -&gt; new EntityNotFoundException(Course.class, courseId));</span>
+
+<span class="fc" id="L527">    course.setHideBasePermissionWarning(true);</span>
+<span class="fc" id="L528">    return courseRepository.save(course);</span>
   }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
