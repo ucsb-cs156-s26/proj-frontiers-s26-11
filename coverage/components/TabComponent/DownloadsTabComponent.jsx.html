@@ -3,7 +3,7 @@
 <html lang="en">
 
 <head>
-    <title>Code coverage report for components/Nav/GithubLogin.jsx</title>
+    <title>Code coverage report for components/TabComponent/DownloadsTabComponent.jsx</title>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../prettify.css" />
     <link rel="stylesheet" href="../../base.css" />
@@ -19,34 +19,34 @@
 <body>
 <div class='wrapper'>
     <div class='pad1'>
-        <h1><a href="../../index.html">All files</a> / <a href="index.html">components/Nav</a> GithubLogin.jsx</h1>
+        <h1><a href="../../index.html">All files</a> / <a href="index.html">components/TabComponent</a> DownloadsTabComponent.jsx</h1>
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>8/8</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>2/2</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
@@ -91,13 +91,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">15x</span>
-<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-yes">25x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">14x</span>
-<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">25x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -105,34 +103,36 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">5x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { Button, Navbar } from "react-bootstrap";
-import { Link } from "react-router";
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import React from "react";
+import { Button, Col, Row } from "react-bootstrap";
 &nbsp;
-export default function GithubLogin({ currentUser, systemInfo }) {
-  var githubOauthLogin =
-    systemInfo?.githubOauthLogin || "/oauth2/authorization/github";
-  if (!currentUser || !currentUser.loggedIn) {
-    return &lt;span data-testid="GithubLogin-logged-out" /&gt;;
-  }
-  if (currentUser.root.user.githubLogin) {
-    return (
-      &lt;&gt;
-        &lt;Navbar.Text className="me-3" as={Link} to="/profile"&gt;
-          Github: {currentUser.root.user.githubLogin}
-        &lt;/Navbar.Text&gt;
-      &lt;/&gt;
-    );
-  }
+export default function DownloadsTabComponent({ courseId, testIdPrefix }) {
+  const downloadCsv = () =&gt; {
+    window.open(`/api/csv/rosterstudents?courseId=${courseId}`, "_blank");
+  };
+&nbsp;
   return (
-    &lt;&gt;
-      &lt;Button href={githubOauthLogin}&gt;Connect Github&lt;/Button&gt;
-    &lt;/&gt;
+    &lt;div data-testid={`${testIdPrefix}-DownloadsTabComponent`}&gt;
+      &lt;Row sm={3} className="p-2"&gt;
+        &lt;Col&gt;
+          &lt;Button
+            onClick={downloadCsv}
+            className="w-100"
+            data-testid={`${testIdPrefix}-download-student-csv-button`}
+          &gt;
+            Download Student CSV
+          &lt;/Button&gt;
+        &lt;/Col&gt;
+      &lt;/Row&gt;
+    &lt;/div&gt;
   );
 }
 &nbsp;</pre></td></tr></table></pre>
