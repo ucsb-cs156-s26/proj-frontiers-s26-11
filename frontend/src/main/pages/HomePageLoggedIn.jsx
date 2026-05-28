@@ -4,6 +4,7 @@ import { useBackend, useBackendMutation } from "main/utils/useBackend";
 import { toast } from "react-toastify";
 import { useCurrentUser } from "main/utils/currentUser";
 import InstructorCoursesTable from "main/components/Courses/InstructorCoursesTable";
+import StaffCoursesTable from "main/components/Courses/StaffCoursesTable";
 import CourseModal from "main/components/Courses/CourseModal";
 import Button from "react-bootstrap/Button";
 import React from "react";
@@ -140,12 +141,9 @@ export default function HomePageLoggedIn() {
         {staffCourses.length > 0 && (
           <>
             <h1>Your Staff Courses</h1>
-            <CoursesTable
-              courses={staffCourses}
-              testId={"StaffCoursesTable"}
-              joinCallback={joinStaffCourseCallback}
-              isLoading={isStaffJoining}
-            />
+                  <StaffCoursesTable
+                    courses={staffCourses}
+                  />
           </>
         )}
       </div>

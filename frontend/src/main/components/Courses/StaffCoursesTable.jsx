@@ -1,66 +1,183 @@
-import { useBackend, useBackendMutation } from "main/utils/useBackend";
-import { toast } from "react-toastify";
-import CoursesTable from "main/components/Courses/CoursesTable";
-import React from "react";
+import OurTable from "main/components/OurTable";
+import { Tooltip, OverlayTrigger, Button, Spinner } from "react-bootstrap";
+import { Link } from "react-router";
 
-export function StudentCoursesTable({ testid }) {
-  const { data: courses } = useBackend(
-    ["/api/courses/list"],
-    // Stryker disable next-line StringLiteral : The default value for an empty ("") method is GET. Therefore, there is no way to kill a mutation that transforms "GET" to ""
-    { method: "GET", url: "/api/courses/list" },
-    // Stryker disable next-line all : don't test default value of empty list
-    [],
-  );
+const columns = [
+  {
+    header: "id",
+    accessorKey: "id", // accessor is the "key" in the data
+  },
+  {
+    header: "Course Name",
+    accessorKey: "courseName",
+    cell: ({ cell }) => {
+        return (
+            <OverlayTrigger
+            placement="right"
+            overlay={
+              <Tooltip id={`tooltip-coursename-${cell.row.index}`}>
+                View course details
+              </Tooltip>
+            }
+          >
+            <Link
+              to={`/staff/courses/${cell.row.original.id}`}
+              data-testid={`StaffCoursesTable-cell-row-${cell.row.index}-col-${cell.column.id}-link`}
+            >
+              {cell.row.original.courseName}
+            </Link>
+          </OverlayTrigger>
+        )
+    }
+  },
+  {
+    header: "Term",
+    accessorKey: "term",
+  },
+  {
+    header: "School",
+    id: "school",
+    accessorKey: "school.displayName",
+  },
+];
 
-  const onJoinSuccess = (message) => {
-    toast(message);
+export default function StaffCoursesTable({
+  courses,
+  testId,
+  joinCallback,
+  isLoading,
+}) {
+  const viewInviteCallback = (cell) => {
+    const organizationName = cell.row.original.orgName;
+    const gitInvite = `https://github.com/orgs/${organizationName}/invitation`;
+    window.open(gitInvite, "_blank");
   };
 
-  const onJoinFail = (result) => {
-    toast(result.response.data ? result.response.data : result.message);
-  };
+  const renderTooltip = (studentStatus) =>
+    function TooltipWrapper(props) {
+      let set_message;
 
-  const cellToAxiosParamsStudent = (cell) => {
-    return {
-      url: `/api/rosterstudents/joinCourse`,
-      method: "PUT",
-      params: {
-        rosterStudentId: cell.row.original.rosterStudentId,
-      },
+      switch (studentStatus) {
+        case "PENDING":
+          set_message =
+            "This course has not been completely set up by your instructor yet.";
+          break;
+        case "JOINCOURSE":
+          set_message =
+            "Clicking this button will generate an invitation to the GitHub organization associated with this course.";
+          break;
+        case "INVITED":
+          set_message =
+            "You have been invited to the GitHub organization associated with this course, but you still need to accept or decline the invitation. Please accept it if you plan to stay enrolled, and decline only if you plan to withdraw from the course.";
+          break;
+        case "OWNER":
+          set_message =
+            "You are an owner of the GitHub organization associated with this course.";
+          break;
+        case "MEMBER":
+          set_message =
+            "You are a member of the GitHub organization associated with this course.";
+          break;
+        default:
+          set_message = "Tooltip for illegal status that will never occur";
+          break;
+      }
+      return (
+        <Tooltip id={`${studentStatus.toLowerCase()}-tooltip`} {...props}>
+          {set_message}
+        </Tooltip>
+      );
     };
-  };
 
-  const studentJoinMutation = useBackendMutation(
-    cellToAxiosParamsStudent,
-    { onSuccess: onJoinSuccess, onError: onJoinFail },
-    [`/api/courses/list`],
-  );
-
-  const joinStudentCourseCallback = async (cell) => {
-    studentJoinMutation.mutate(cell);
-  };
-
-  const isStudentJoining = (cell) => {
-    return (
-      studentJoinMutation.isPending &&
-      studentJoinMutation.variables.row.index === cell.row.index
-    );
-  };
-
+  const columnsWithStatus = [
+    ...columns,
+    {
+      header: "Status",
+      accessorKey: "studentStatus",
+      cell: ({ cell }) => {
+        const status = cell.row.original.studentStatus;
+        if (status === "PENDING") {
+          return (
+            <OverlayTrigger
+              placement="right"
+              overlay={renderTooltip("PENDING")}
+            >
+              <span className="text-warning">Pending</span>
+            </OverlayTrigger>
+          );
+        } else if (status === "JOINCOURSE") {
+          const cellIsLoading = isLoading(cell);
+          return (
+            <OverlayTrigger
+              placement="right"
+              overlay={renderTooltip("JOINCOURSE")}
+            >
+              <span>
+                <Button
+                  variant={"primary"}
+                  onClick={() => joinCallback(cell)}
+                  data-testid={`${testId}-cell-row-${cell.row.index}-col-${cell.column.id}-button`}
+                  disabled={cellIsLoading}
+                >
+                  {cellIsLoading ? (
+                    <>
+                      <Spinner
+                        as="span"
+                        animation="grow"
+                        size="sm"
+                        role="status"
+                      />
+                      Joining...
+                    </>
+                  ) : (
+                    <>Join Course</>
+                  )}
+                </Button>
+              </span>
+            </OverlayTrigger>
+          );
+        } else if (status === "INVITED") {
+          return (
+            <OverlayTrigger
+              placement="right"
+              overlay={renderTooltip("INVITED")}
+            >
+              <span>
+                <Button
+                  variant={"primary"}
+                  onClick={() => viewInviteCallback(cell)}
+                  data-testid={`${testId}-cell-row-${cell.row.index}-col-${cell.column.id}-button`}
+                >
+                  View Invite
+                </Button>
+              </span>
+            </OverlayTrigger>
+          );
+        } else if (status === "OWNER") {
+          return (
+            <OverlayTrigger placement="right" overlay={renderTooltip("OWNER")}>
+              <span className="text-info">Owner</span>
+            </OverlayTrigger>
+          );
+        } else if (status === "MEMBER") {
+          return (
+            <OverlayTrigger placement="right" overlay={renderTooltip("MEMBER")}>
+              <span className="text-primary">Member</span>
+            </OverlayTrigger>
+          );
+        }
+        return (
+          <OverlayTrigger
+            placement="right"
+            overlay={renderTooltip(cell.row.original.studentStatus)}
+          >
+            <span>{status}</span>
+          </OverlayTrigger>
+        );
+      },
+    },
+  ];
   return (
-    <>
-      {courses.length > 0 ? (
-        <>
-          <CoursesTable
-            courses={courses}
-            testId={testid}
-            joinCallback={joinStudentCourseCallback}
-            isLoading={isStudentJoining}
-          />
-        </>
-      ) : (
-        <p>You are not enrolled in any student courses yet.</p>
-      )}
-    </>
+    <OurTable data={courses} columns={columnsWithStatus} testid={testId} />
   );
 }

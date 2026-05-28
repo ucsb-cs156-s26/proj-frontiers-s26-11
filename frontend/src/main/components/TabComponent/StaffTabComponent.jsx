@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import { useBackend, useBackendMutation } from "main/utils/useBackend";
 import React, { useState } from "react";
+import { hasRole } from "main/utils/currentUser";
 import {
   Button,
   Col,
@@ -32,6 +33,8 @@ export default function StaffTabComponent({
     true,
   );
   const [searchTerm, setSearchTerm] = useState("");
+
+  const isAdminOrInstructor = hasRole(currentUser, "ROLE_ADMIN") || hasRole(currentUser, "ROLE_INSTRUCTOR");
 
   const objectToAxiosParamsPost = (staff) => ({
     url: `/api/coursestaff/post`,
@@ -130,6 +133,7 @@ export default function StaffTabComponent({
         </ModalBody>
       </Modal>
       <Row sm={3} className="p-2">
+        {isAdminOrInstructor &&(
         <Col>
           <div className="d-flex align-items-center position-relative">
             <Button
@@ -162,6 +166,8 @@ export default function StaffTabComponent({
             </OverlayTrigger>
           </div>
         </Col>
+        )}
+        {isAdminOrInstructor &&(
         <Col>
           <Button
             onClick={() => showPostModal(true)}
@@ -171,6 +177,7 @@ export default function StaffTabComponent({
             Add Staff Member
           </Button>
         </Col>
+        )}
         <Col>
           <OverlayTrigger placement="top" overlay={renderComingSoonTooltip}>
             <span className="d-inline-block w-100">
@@ -223,6 +230,7 @@ export default function StaffTabComponent({
           currentUser={currentUser}
           courseId={courseId}
           testIdPrefix={`${testIdPrefix}-CourseStaffTable`}
+          canDelete={isAdminOrInstructor}
         />
       </Row>
     </div>
