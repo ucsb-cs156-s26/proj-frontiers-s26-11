@@ -101,7 +101,7 @@ import org.springframework.web.bind.annotation.*;
       String instructorEmail,
       int numStudents,
       int numStaff,
-      boolean hideBasePermissionWarning) { 
+      boolean hideBasePermissionWarning) {
 
     // Creates view from Course entity
     public InstructorCourseView(Course c) {
@@ -115,7 +115,7 @@ import org.springframework.web.bind.annotation.*;
 <span class="fc" id="L115">          c.getInstructorEmail(),</span>
 <span class="fc bfc" id="L116" title="All 2 branches covered.">          c.getRosterStudents() != null ? c.getRosterStudents().size() : 0,</span>
 <span class="fc bfc" id="L117" title="All 2 branches covered.">          c.getCourseStaff() != null ? c.getCourseStaff().size() : 0,</span>
-<span class="fc" id="L118">          c.getHideBasePermissionWarning()); </span>
+<span class="fc" id="L118">          c.getHideBasePermissionWarning());</span>
 <span class="fc" id="L119">    }</span>
   }
 
