@@ -36,7 +36,7 @@ public class Course {
   private String canvasCourseId;
 
   @Builder.Default
-  @Column(columnDefinition = "boolean default false")
+  @Column(name = "hide_base_permission_warning", nullable = false)
   private boolean hideBasePermissionWarning = false;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "course")
