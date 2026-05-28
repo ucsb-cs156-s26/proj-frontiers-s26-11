@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GithubGraphQLService.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">frontiers</a> &gt; <a href="index.source.html" class="el_package">edu.ucsb.cs156.frontiers.services</a> &gt; <span class="el_source">GithubGraphQLService.java</span></div><h1>GithubGraphQLService.java</h1><pre class="source lang-java linenums">package edu.ucsb.cs156.frontiers.services;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.ucsb.cs156.frontiers.entities.Course;
+import edu.ucsb.cs156.frontiers.entities.DownloadRequest;
+import edu.ucsb.cs156.frontiers.entities.DownloadedCommit;
+import edu.ucsb.cs156.frontiers.errors.NoLinkedOrganizationException;
+import edu.ucsb.cs156.frontiers.repositories.DownloadedCommitRepository;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.graphql.GraphQlResponse;
+import org.springframework.graphql.client.HttpSyncGraphQlClient;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
+
+@Service
+<span class="fc" id="L26">@Slf4j</span>
+public class GithubGraphQLService {
+
+  private final HttpSyncGraphQlClient graphQlClient;
+
+  private final RestClient.Builder restClientBuilder;
+
+  private final JwtService jwtService;
+
+<span class="fc" id="L35">  private final String githubBaseUrl = &quot;https://api.github.com/graphql&quot;;</span>
+
+  private final ObjectMapper jacksonObjectMapper;
+  private final DownloadedCommitRepository downloadedCommitRepository;
+
+  public GithubGraphQLService(
+      RestClient.Builder builder,
+      JwtService jwtService,
+      ObjectMapper jacksonObjectMapper,
+<span class="fc" id="L44">      DownloadedCommitRepository downloadedCommitRepository) {</span>
+<span class="fc" id="L45">    this.jwtService = jwtService;</span>
+<span class="fc" id="L46">    this.restClientBuilder = builder;</span>
+<span class="fc" id="L47">    this.graphQlClient =</span>
+<span class="fc" id="L48">        HttpSyncGraphQlClient.builder(builder.baseUrl(githubBaseUrl).build())</span>
+<span class="fc" id="L49">            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)</span>
+<span class="fc" id="L50">            .build();</span>
+<span class="fc" id="L51">    this.jacksonObjectMapper = jacksonObjectMapper;</span>
+<span class="fc" id="L52">    this.downloadedCommitRepository = downloadedCommitRepository;</span>
+<span class="fc" id="L53">  }</span>
+
+  /**
+   * Retrieves the name of the default branch for a given GitHub repository.
+   *
+   * @param owner The owner (username or organization) of the repository.
+   * @param repo The name of the repository.
+   * @return A Mono emitting the default branch name, or an empty Mono if not found.
+   */
+  public String getDefaultBranchName(Course course, String owner, String repo)
+      throws JsonProcessingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoLinkedOrganizationException {
+<span class="fc" id="L67">    log.info(</span>
+        &quot;getDefaultBranchName called with course.getId(): {} owner: {}, repo: {}&quot;,
+<span class="fc" id="L69">        course.getId(),</span>
+        owner,
+        repo);
+<span class="fc" id="L72">    String githubToken = jwtService.getInstallationToken(course);</span>
+
+    // language=GraphQL
+<span class="fc" id="L75">    String query =</span>
+        &quot;&quot;&quot;
+        query getDefaultBranch($owner: String!, $repo: String!) {
+          repository(owner: $owner, name: $repo) {
+            defaultBranchRef {
+              name
+            }
+          }
+        }
+        &quot;&quot;&quot;;
+
+<span class="fc" id="L86">    return graphQlClient</span>
+<span class="fc" id="L87">        .mutate()</span>
+<span class="fc" id="L88">        .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
+<span class="fc" id="L89">        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)</span>
+<span class="fc" id="L90">        .build()</span>
+<span class="fc" id="L91">        .document(query)</span>
+<span class="fc" id="L92">        .variable(&quot;owner&quot;, owner)</span>
+<span class="fc" id="L93">        .variable(&quot;repo&quot;, repo)</span>
+<span class="fc" id="L94">        .retrieveSync(&quot;repository.defaultBranchRef.name&quot;)</span>
+<span class="fc" id="L95">        .toEntity(String.class);</span>
+  }
+
+  /**
+   * Retrieves the default base repository permission for a GitHub organization.
+   *
+   * @param course The course entity, used to fetch the associated GitHub installation token.
+   * @param orgLogin The GitHub organization login.
+   * @return The default repository permission for the organization.
+   */
+  public String getDefaultBasePermission(Course course, String orgLogin)
+      throws JsonProcessingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoLinkedOrganizationException {
+<span class="fc" id="L110">    log.info(</span>
+        &quot;getDefaultBasePermission called with course.getId(): {} orgLogin: {}&quot;,
+<span class="fc" id="L112">        course.getId(),</span>
+        orgLogin);
+
+<span class="fc" id="L115">    String githubToken = jwtService.getInstallationToken(course);</span>
+
+<span class="fc" id="L117">    JsonNode response =</span>
+        restClientBuilder
+<span class="fc" id="L119">            .baseUrl(&quot;https://api.github.com&quot;)</span>
+<span class="fc" id="L120">            .build()</span>
+<span class="fc" id="L121">            .get()</span>
+<span class="fc" id="L122">            .uri(&quot;/orgs/{orgLogin}&quot;, orgLogin)</span>
+<span class="fc" id="L123">            .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
+<span class="fc" id="L124">            .header(&quot;Accept&quot;, &quot;application/vnd.github+json&quot;)</span>
+<span class="fc" id="L125">            .retrieve()</span>
+<span class="fc" id="L126">            .body(JsonNode.class);</span>
+
+<span class="fc" id="L128">    String permission = response.path(&quot;default_repository_permission&quot;).asText();</span>
+
+<span class="fc bfc" id="L130" title="All 2 branches covered.">    if (&quot;none&quot;.equals(permission)) {</span>
+<span class="fc" id="L131">      return &quot;None&quot;;</span>
+    }
+
+<span class="fc bfc" id="L134" title="All 2 branches covered.">    if (&quot;read&quot;.equals(permission)) {</span>
+<span class="fc" id="L135">      return &quot;Read&quot;;</span>
+    }
+
+<span class="fc bfc" id="L138" title="All 2 branches covered.">    if (&quot;write&quot;.equals(permission)) {</span>
+<span class="fc" id="L139">      return &quot;Write&quot;;</span>
+    }
+
+<span class="fc bfc" id="L142" title="All 2 branches covered.">    if (&quot;admin&quot;.equals(permission)) {</span>
+<span class="fc" id="L143">      return &quot;Admin&quot;;</span>
+    }
+
+<span class="fc" id="L146">    return permission;</span>
+  }
+
+  public String getCommits(
+      Course course, String owner, String repo, String branch, int first, String after)
+      throws JsonProcessingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoLinkedOrganizationException {
+<span class="fc" id="L155">    return getCommits(course, owner, repo, branch, null, null, first, after);</span>
+  }
+
+  /**
+   * Retrieves the commit history for a specified branch of a GitHub repository within a given time
+   * range.
+   *
+   * @param course The course entity, used to fetch the associated GitHub installation token.
+   * @param owner The owner of the GitHub repository.
+   * @param repo The name of the GitHub repository.
+   * @param branch The branch of the repository for which the commit history is retrieved.
+   * @param since The start time for fetching commits (inclusive). Optional. Can be null.
+   * @param until The end time for fetching commits (exclusive). Optional. Can be null.
+   * @param size The maximum number of commits to retrieve in one request.
+   * @param cursor The pagination cursor pointing to the start of the commit history to fetch.
+   *     Optional. Can be null.
+   * @return A JSON string representing the commit history and associated metadata.
+   * @throws NoLinkedOrganizationException If no linked organization exists for the specified
+   *     course.
+   */
+  public String getCommits(
+      Course course,
+      String owner,
+      String repo,
+      String branch,
+      Instant since,
+      Instant until,
+      int size,
+      String cursor)
+      throws JsonProcessingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoLinkedOrganizationException {
+<span class="fc" id="L188">    String githubToken = jwtService.getInstallationToken(course);</span>
+    // language=GraphQL
+<span class="fc" id="L190">    String query =</span>
+        &quot;&quot;&quot;
+            query GetBranchCommits($owner: String!, $repo: String!, $branch: String!, $first: Int!, $after: String, $since: GitTimestamp, $until: GitTimestamp) {
+              repository(owner: $owner, name: $repo) {
+                ref(qualifiedName: $branch) {
+                  target {
+                    ... on Commit {
+                      history(first: $first, after: $after, since: $since, until: $until) {
+                        pageInfo {
+                          hasNextPage
+                          endCursor
+                        }
+                        edges {
+                          node {
+                            oid
+                            url
+                            messageHeadline
+                            committedDate
+                            author {
+                              name
+                              email
+                              user {
+                                login
+                              }
+                            }
+                            committer {
+                              name
+                              email
+                              user {
+                                login
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+            &quot;&quot;&quot;;
+
+<span class="fc" id="L232">    GraphQlResponse response =</span>
+        graphQlClient
+<span class="fc" id="L234">            .mutate()</span>
+<span class="fc" id="L235">            .header(&quot;Authorization&quot;, &quot;Bearer &quot; + githubToken)</span>
+<span class="fc" id="L236">            .build()</span>
+<span class="fc" id="L237">            .document(query)</span>
+<span class="fc" id="L238">            .variable(&quot;owner&quot;, owner)</span>
+<span class="fc" id="L239">            .variable(&quot;repo&quot;, repo)</span>
+<span class="fc" id="L240">            .variable(&quot;branch&quot;, branch)</span>
+<span class="fc" id="L241">            .variable(&quot;first&quot;, size)</span>
+<span class="fc" id="L242">            .variable(&quot;after&quot;, cursor)</span>
+<span class="fc" id="L243">            .variable(&quot;since&quot;, since)</span>
+<span class="fc" id="L244">            .variable(&quot;until&quot;, until)</span>
+<span class="fc" id="L245">            .executeSync();</span>
+
+<span class="fc" id="L247">    Map&lt;String, Object&gt; data = response.getData();</span>
+<span class="fc" id="L248">    String jsonData = jacksonObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(data);</span>
+<span class="fc" id="L249">    return jsonData;</span>
+  }
+
+  public void downloadCommitHistory(DownloadRequest downloadRequest)
+      throws NoSuchAlgorithmException, InvalidKeySpecException, JsonProcessingException {
+<span class="fc" id="L254">    String pointer = null;</span>
+    boolean hasNextPage;
+<span class="fc" id="L256">    List&lt;DownloadedCommit&gt; downloadedCommits = new ArrayList&lt;&gt;(4000);</span>
+    do {
+<span class="fc" id="L258">      JsonNode currentPage =</span>
+<span class="fc" id="L259">          jacksonObjectMapper.readTree(</span>
+<span class="fc" id="L260">              getCommits(</span>
+<span class="fc" id="L261">                  downloadRequest.getCourse(),</span>
+<span class="fc" id="L262">                  downloadRequest.getOrg(),</span>
+<span class="fc" id="L263">                  downloadRequest.getRepo(),</span>
+<span class="fc" id="L264">                  downloadRequest.getBranch(),</span>
+<span class="fc" id="L265">                  downloadRequest.getStartDate(),</span>
+<span class="fc" id="L266">                  downloadRequest.getEndDate(),</span>
+                  100,
+                  pointer));
+<span class="fc" id="L269">      pointer =</span>
+          currentPage
+<span class="fc" id="L271">              .path(&quot;repository&quot;)</span>
+<span class="fc" id="L272">              .path(&quot;ref&quot;)</span>
+<span class="fc" id="L273">              .path(&quot;target&quot;)</span>
+<span class="fc" id="L274">              .path(&quot;history&quot;)</span>
+<span class="fc" id="L275">              .path(&quot;pageInfo&quot;)</span>
+<span class="fc" id="L276">              .path(&quot;endCursor&quot;)</span>
+<span class="fc" id="L277">              .asText();</span>
+<span class="fc" id="L278">      hasNextPage =</span>
+          currentPage
+<span class="fc" id="L280">              .path(&quot;repository&quot;)</span>
+<span class="fc" id="L281">              .path(&quot;ref&quot;)</span>
+<span class="fc" id="L282">              .path(&quot;target&quot;)</span>
+<span class="fc" id="L283">              .path(&quot;history&quot;)</span>
+<span class="fc" id="L284">              .path(&quot;pageInfo&quot;)</span>
+<span class="fc" id="L285">              .path(&quot;hasNextPage&quot;)</span>
+<span class="fc" id="L286">              .asBoolean();</span>
+<span class="fc" id="L287">      JsonNode commits =</span>
+<span class="fc" id="L288">          currentPage.path(&quot;repository&quot;).path(&quot;ref&quot;).path(&quot;target&quot;).path(&quot;history&quot;).path(&quot;edges&quot;);</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">      for (JsonNode node : commits) {</span>
+<span class="fc" id="L290">        DownloadedCommit newCommit =</span>
+<span class="fc" id="L291">            jacksonObjectMapper.treeToValue(node.get(&quot;node&quot;), DownloadedCommit.class);</span>
+<span class="fc" id="L292">        newCommit.setRequest(downloadRequest);</span>
+<span class="fc" id="L293">        downloadedCommits.add(newCommit);</span>
+<span class="fc" id="L294">      }</span>
+
+<span class="fc bfc" id="L296" title="All 2 branches covered.">    } while (hasNextPage);</span>
+<span class="fc" id="L297">    downloadedCommitRepository.saveAll(downloadedCommits);</span>
+<span class="fc" id="L298">  }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
