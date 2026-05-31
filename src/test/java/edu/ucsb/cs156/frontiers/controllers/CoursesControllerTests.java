@@ -1942,7 +1942,7 @@ public class CoursesControllerTests extends ControllerTestCase {
 
     MvcResult response =
         mockMvc
-            .perform(post("/api/course/warnings/hideBasePermissionWarning/1").with(csrf()))
+            .perform(post("/api/courses/warnings/hideBasePermissionWarning/1").with(csrf()))
             .andExpect(status().isOk())
             .andReturn();
 
@@ -1960,7 +1960,7 @@ public class CoursesControllerTests extends ControllerTestCase {
 
     MvcResult response =
         mockMvc
-            .perform(post("/api/course/warnings/hideBasePermissionWarning/1").with(csrf()))
+            .perform(post("/api/courses/warnings/hideBasePermissionWarning/1").with(csrf()))
             .andExpect(status().isNotFound())
             .andReturn();
 

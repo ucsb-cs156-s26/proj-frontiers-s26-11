@@ -39,7 +39,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Course")
-@RequestMapping({"/api/courses", "/api/course"})
+@RequestMapping("/api/courses")
 @RestController
 @Slf4j
 public class CoursesController extends ApiController {
